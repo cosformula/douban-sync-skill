@@ -43,7 +43,7 @@ node scripts/douban-rss-sync.js
 
 **Setup:** Set environment variables:
 - `DOUBAN_USER` (required): Douban user ID
-- `OBSIDIAN_DIR` (optional): Output root directory, default `~/obsidian-vault/豆瓣`
+- `DOUBAN_OUTPUT_DIR` (optional): Output root directory, default `~/douban-sync`
 
 **Recommended:** Add a daily cron job for automatic sync.
 

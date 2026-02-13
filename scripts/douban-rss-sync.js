@@ -10,9 +10,9 @@ const path = require('path');
 const DOUBAN_USER = process.env.DOUBAN_USER;
 if (!DOUBAN_USER) { console.error('Error: DOUBAN_USER env var is required'); process.exit(1); }
 if (!/^[A-Za-z0-9._-]+$/.test(DOUBAN_USER)) { console.error('Error: DOUBAN_USER contains invalid characters'); process.exit(1); }
-const BASE_DIR = process.env.OBSIDIAN_DIR || path.join(process.env.HOME, 'obsidian-vault/豆瓣');
-const OBSIDIAN_DIR = path.join(BASE_DIR, DOUBAN_USER);
-const STATE_FILE = process.env.STATE_FILE || path.join(OBSIDIAN_DIR, '.douban-rss-state.json');
+const BASE_DIR = process.env.DOUBAN_OUTPUT_DIR || path.join(process.env.HOME, 'douban-sync');
+const DOUBAN_OUTPUT_DIR = path.join(BASE_DIR, DOUBAN_USER);
+const STATE_FILE = process.env.STATE_FILE || path.join(DOUBAN_OUTPUT_DIR, '.douban-rss-state.json');
 const RSS_URL = `https://www.douban.com/feed/people/${DOUBAN_USER}/interests`;
 
 // Map RSS title patterns to files + status
@@ -189,7 +189,7 @@ async function main() {
       continue;
     }
 
-    const filePath = path.join(OBSIDIAN_DIR, cat.file);
+    const filePath = path.join(DOUBAN_OUTPUT_DIR, cat.file);
 
     if (isAlreadyInFile(filePath, item.link)) {
       console.log(`  Already exists: ${item.title}`);

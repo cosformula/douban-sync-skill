@@ -10,7 +10,7 @@ const BROWSER_URL = process.env.BROWSER_URL || 'http://127.0.0.1:18800';
 const USER = process.env.DOUBAN_USER;
 if (!USER) { console.error('Error: DOUBAN_USER env var is required'); process.exit(1); }
 if (!/^[A-Za-z0-9._-]+$/.test(USER)) { console.error('Error: DOUBAN_USER contains invalid characters'); process.exit(1); }
-const BASE_DIR = process.env.OBSIDIAN_DIR || path.join(process.env.HOME, 'obsidian-vault/豆瓣');
+const BASE_DIR = process.env.DOUBAN_OUTPUT_DIR || path.join(process.env.HOME, 'douban-sync');
 const OUTPUT_DIR = path.join(BASE_DIR, USER);
 
 const CSV_HEADER = 'title,url,date,rating,status,comment\n';

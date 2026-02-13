@@ -35,7 +35,7 @@ DOUBAN_USER=your_douban_id node scripts/douban-rss-sync.js
 
 环境变量：
 - `DOUBAN_USER`（必填）：豆瓣用户 ID
-- `OBSIDIAN_DIR`（可选）：输出根目录，默认 `~/obsidian-vault/豆瓣`
+- `DOUBAN_OUTPUT_DIR`（可选）：输出根目录，默认 `~/douban-sync`。文件会写入 `$DOUBAN_OUTPUT_DIR/$DOUBAN_USER/` 下
 
 ### 全量导出
 
