@@ -15,7 +15,7 @@
 ## 输出格式
 
 ```
-豆瓣/
+douban-sync/
 └── {user_id}/
     ├── 书.csv
     ├── 影视.csv
