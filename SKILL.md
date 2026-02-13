@@ -1,11 +1,11 @@
 ---
 name: douban-sync
-description: Export and sync Douban (豆瓣) book/movie/music collections to local Markdown files (Obsidian-compatible). Use when the user wants to export their Douban reading/watching/listening history, set up incremental sync via RSS, or manage their Douban data locally.
+description: Export and sync Douban (豆瓣) book/movie/music collections to local CSV files (Obsidian-compatible). Use when the user wants to export their Douban reading/watching/listening history, set up incremental sync via RSS, or manage their Douban data locally.
 ---
 
 # Douban Sync
 
-Export Douban collections (books, movies, music) to Markdown and keep them in sync via RSS.
+Export Douban collections (books, movies, music) to CSV and keep them in sync via RSS.
 
 ## Two Modes
 
@@ -26,11 +26,10 @@ Each page shows 30 items in list mode. Paginate with `?start=0,30,60...` until n
 
 **Rate limiting:** Wait 2-3 seconds between pages. If blocked, wait 30 seconds and retry.
 
-**Parse each item:**
-- Title + link from `.title a`
-- Rating from `span[class*="rating"]` (rating1-5 → ★-★★★★★)
-- Date from `.date` text (YYYY-MM-DD)
-- Short comment from `.comment`
+**Scripts:**
+- `scripts/douban-scraper.js` — HTTP-only, no browser needed (may get rate-limited)
+- `scripts/douban-browser-scraper.js` — via Puppeteer CDP, needs a running browser
+- `scripts/douban-extract.js` — generates a browser console script for manual extraction
 
 ### 2. Incremental Sync (daily, via RSS)
 
@@ -42,31 +41,28 @@ node scripts/douban-rss-sync.js
 
 **Setup:** Set environment variables or edit the script constants:
 - `DOUBAN_USER`: Douban user ID (default: read from script)
-- `OBSIDIAN_DIR`: Output directory for Markdown files
+- `OBSIDIAN_DIR`: Output directory for CSV files
 
 **Recommended:** Add a daily cron job for automatic sync.
 
 ## Output Format
 
-One Markdown file per category in the output directory:
+Three CSV files in the output directory:
 
 ```
 豆瓣/
-├── 读过的书.md
-├── 在读的书.md
-├── 想读的书.md
-├── 看过的影视.md
-├── 在看的影视.md
-├── 想看的影视.md
-├── 听过的音乐.md
-├── 在听的音乐.md
-└── 想听的音乐.md
+├── 书.csv
+├── 影视.csv
+└── 音乐.csv
 ```
 
-Each entry is one line:
-```markdown
-- [书名](https://book.douban.com/subject/12345/) | 2026-01-15 | ★★★★★ | "短评内容"
+CSV columns:
+```csv
+title,url,date,rating,status,comment
+"书名","https://book.douban.com/subject/12345/","2026-01-15","★★★★★","读过","短评内容"
 ```
+
+- `status`: 读过/在读/想读, 看过/在看/想看, 听过/在听/想听
 
 ## Deduplication
 

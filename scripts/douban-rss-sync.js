@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Douban RSS → Obsidian incremental sync
-// Pulls RSS feed, parses new entries, appends to corresponding md files
+// Douban RSS → CSV incremental sync
+// Pulls RSS feed, parses new entries, appends to corresponding CSV files
 
 const https = require('https');
 const http = require('http');
@@ -12,18 +12,20 @@ const OBSIDIAN_DIR = process.env.OBSIDIAN_DIR || path.join(process.env.HOME, 'ob
 const STATE_FILE = process.env.STATE_FILE || path.join(OBSIDIAN_DIR, '.douban-rss-state.json');
 const RSS_URL = `https://www.douban.com/feed/people/${DOUBAN_USER}/interests`;
 
-// Map RSS title patterns to files
+// Map RSS title patterns to files + status
 const CATEGORY_MAP = [
-  { pattern: /^读过/, file: '读过的书.md', type: 'book' },
-  { pattern: /^在读/, file: '在读的书.md', type: 'book' },
-  { pattern: /^想读/, file: '想读的书.md', type: 'book' },
-  { pattern: /^看过/, file: '看过的影视.md', type: 'movie' },
-  { pattern: /^在看/, file: '在看的影视.md', type: 'movie' },
-  { pattern: /^想看/, file: '想看的影视.md', type: 'movie' },
-  { pattern: /^听过/, file: '听过的音乐.md', type: 'music' },
-  { pattern: /^在听/, file: '在听的音乐.md', type: 'music' },
-  { pattern: /^想听/, file: '想听的音乐.md', type: 'music' },
+  { pattern: /^读过/, file: '书.csv', status: '读过', type: 'book' },
+  { pattern: /^在读/, file: '书.csv', status: '在读', type: 'book' },
+  { pattern: /^想读/, file: '书.csv', status: '想读', type: 'book' },
+  { pattern: /^看过/, file: '影视.csv', status: '看过', type: 'movie' },
+  { pattern: /^在看/, file: '影视.csv', status: '在看', type: 'movie' },
+  { pattern: /^想看/, file: '影视.csv', status: '想看', type: 'movie' },
+  { pattern: /^听过/, file: '音乐.csv', status: '听过', type: 'music' },
+  { pattern: /^在听/, file: '音乐.csv', status: '在听', type: 'music' },
+  { pattern: /^想听/, file: '音乐.csv', status: '想听', type: 'music' },
 ];
+
+const CSV_HEADER = 'title,url,date,rating,status,comment\n';
 
 const RATING_MAP = {
   '力荐': '★★★★★',
@@ -47,6 +49,14 @@ function fetch(url) {
   });
 }
 
+function csvEscape(str) {
+  if (!str) return '';
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return '"' + str.replace(/"/g, '""') + '"';
+  }
+  return str;
+}
+
 function parseItems(xml) {
   const items = [];
   const itemRegex = /<item>([\s\S]*?)<\/item>/g;
@@ -63,11 +73,9 @@ function parseItems(xml) {
     const pubDate = get('pubDate');
     const desc = get('description');
 
-    // Extract rating from description
     const ratingMatch = desc.match(/推荐:\s*(力荐|推荐|还行|较差|很差)/);
     const rating = ratingMatch ? RATING_MAP[ratingMatch[1]] || '' : '';
 
-    // Extract comment if any
     const commentMatch = desc.match(/短评:\s*([^<]+)/);
     const comment = commentMatch ? commentMatch[1].trim() : '';
 
@@ -89,7 +97,6 @@ function saveState(state) {
 }
 
 function extractName(title) {
-  // "读过必然" → "必然", "看过极限审判" → "极限审判"
   for (const { pattern } of CATEGORY_MAP) {
     if (pattern.test(title)) {
       return title.replace(pattern, '');
@@ -116,35 +123,26 @@ function formatDate(pubDateStr) {
   }
 }
 
-function appendToFile(filePath, entry) {
+function ensureCsvFile(filePath) {
+  if (!fs.existsSync(filePath)) {
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, CSV_HEADER);
+  }
+}
+
+function appendToCsv(filePath, entry, status) {
+  ensureCsvFile(filePath);
   const name = extractName(entry.title);
   const date = formatDate(entry.pubDate);
-  const parts = [`- [${name}](${entry.link})`];
-  if (date) parts.push(date);
-  if (entry.rating) parts.push(entry.rating);
-  if (entry.comment) parts.push(`"${entry.comment}"`);
-  const line = parts.join(' | ') + '\n';
-
-  if (!fs.existsSync(filePath)) {
-    const cat = CATEGORY_MAP.find(c => filePath.endsWith(c.file));
-    const header = cat ? `# ${cat.file.replace('.md', '')}\n\n` : '';
-    fs.writeFileSync(filePath, header + line);
-  } else {
-    // Append after the header/count line
-    const content = fs.readFileSync(filePath, 'utf8');
-    // Insert at the top of the list (after header lines)
-    const lines = content.split('\n');
-    let insertIdx = 0;
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i].startsWith('#') || lines[i].startsWith('>') || lines[i].trim() === '') {
-        insertIdx = i + 1;
-      } else {
-        break;
-      }
-    }
-    lines.splice(insertIdx, 0, line.trimEnd());
-    fs.writeFileSync(filePath, lines.join('\n'));
-  }
+  const line = [
+    csvEscape(name),
+    csvEscape(entry.link),
+    csvEscape(date),
+    csvEscape(entry.rating),
+    csvEscape(status),
+    csvEscape(entry.comment),
+  ].join(',') + '\n';
+  fs.appendFileSync(filePath, line);
 }
 
 async function main() {
@@ -158,10 +156,8 @@ async function main() {
   let newCount = 0;
 
   for (const item of items) {
-    // Skip if already synced
     if (knownGuids.has(item.guid)) continue;
 
-    // Find category
     const cat = CATEGORY_MAP.find(c => c.pattern.test(item.title));
     if (!cat) {
       console.log(`  Skipping unknown category: ${item.title}`);
@@ -170,18 +166,16 @@ async function main() {
 
     const filePath = path.join(OBSIDIAN_DIR, cat.file);
 
-    // Skip if link already in file (dedup)
     if (isAlreadyInFile(filePath, item.link)) {
       console.log(`  Already exists: ${item.title}`);
       continue;
     }
 
     console.log(`  Adding: ${item.title} → ${cat.file}`);
-    appendToFile(filePath, item);
+    appendToCsv(filePath, item, cat.status);
     newCount++;
   }
 
-  // Save all current guids
   state.lastSyncGuids = items.map(i => i.guid);
   state.lastSync = new Date().toISOString();
   saveState(state);
