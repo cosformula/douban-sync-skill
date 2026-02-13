@@ -25,6 +25,21 @@
 
 CSV 列：`title,url,date,rating,status,comment`
 
+## 安装
+
+### 通过 ClawHub（推荐）
+
+```bash
+npm i -g clawhub
+clawhub install douban-sync-skill
+```
+
+### 手动安装
+
+```bash
+git clone https://github.com/cosformula/douban-sync-skill.git skills/douban-sync
+```
+
 ## 使用
 
 ### 增量同步（推荐日常使用）
