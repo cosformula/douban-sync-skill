@@ -9,6 +9,7 @@ const path = require('path');
 
 const DOUBAN_USER = process.env.DOUBAN_USER;
 if (!DOUBAN_USER) { console.error('Error: DOUBAN_USER env var is required'); process.exit(1); }
+if (!/^[A-Za-z0-9._-]+$/.test(DOUBAN_USER)) { console.error('Error: DOUBAN_USER contains invalid characters'); process.exit(1); }
 const BASE_DIR = process.env.OBSIDIAN_DIR || path.join(process.env.HOME, 'obsidian-vault/豆瓣');
 const OBSIDIAN_DIR = path.join(BASE_DIR, DOUBAN_USER);
 const STATE_FILE = process.env.STATE_FILE || path.join(OBSIDIAN_DIR, '.douban-rss-state.json');
@@ -40,17 +41,24 @@ const RATING_MAP = {
   '很差': '★',
 };
 
-function fetch(url) {
+function fetch(url, redirects = 0) {
+  if (redirects > 5) return Promise.reject(new Error('Too many redirects'));
   return new Promise((resolve, reject) => {
     const mod = url.startsWith('https') ? https : http;
-    mod.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, res => {
+    const req = mod.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 15000 }, res => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        return fetch(res.headers.location).then(resolve, reject);
+        const target = new URL(res.headers.location, url).href;
+        return fetch(target, redirects + 1).then(resolve, reject);
+      }
+      if (res.statusCode >= 400) {
+        return reject(new Error(`HTTP ${res.statusCode} for ${url}`));
       }
       let data = '';
       res.on('data', c => data += c);
       res.on('end', () => resolve(data));
-    }).on('error', reject);
+    });
+    req.on('error', reject);
+    req.on('timeout', () => { req.destroy(); reject(new Error('Request timeout')); });
   });
 }
 
@@ -113,7 +121,14 @@ function extractName(title) {
 function isAlreadyInFile(filePath, link) {
   try {
     const content = fs.readFileSync(filePath, 'utf8');
-    return content.includes(link);
+    const lines = content.split('\n');
+    for (let i = 1; i < lines.length; i++) { // skip header
+      const cols = lines[i].split(',');
+      // URL is second column; strip quotes
+      const url = cols[1] ? cols[1].replace(/^"|"$/g, '') : '';
+      if (url === link) return true;
+    }
+    return false;
   } catch {
     return false;
   }
@@ -121,8 +136,13 @@ function isAlreadyInFile(filePath, link) {
 
 function formatDate(pubDateStr) {
   try {
+    // Try to extract YYYY-MM-DD directly from source first
+    const direct = pubDateStr.match(/(\d{4}-\d{2}-\d{2})/);
+    if (direct) return direct[1];
+    // Convert to CST (UTC+8) to avoid date shift
     const d = new Date(pubDateStr);
-    return d.toISOString().split('T')[0];
+    const cst = new Date(d.getTime() + 8 * 3600000);
+    return cst.toISOString().split('T')[0];
   } catch {
     return '';
   }

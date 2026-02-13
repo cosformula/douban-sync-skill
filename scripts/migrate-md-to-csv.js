@@ -9,6 +9,7 @@ const path = require('path');
 
 const DOUBAN_USER = process.env.DOUBAN_USER;
 if (!DOUBAN_USER) { console.error('Error: DOUBAN_USER env var is required'); process.exit(1); }
+if (!/^[A-Za-z0-9._-]+$/.test(DOUBAN_USER)) { console.error('Error: DOUBAN_USER contains invalid characters'); process.exit(1); }
 const BASE_DIR = process.env.OBSIDIAN_DIR || path.join(process.env.HOME, 'obsidian-vault/豆瓣');
 const DOUBAN_DIR = BASE_DIR; // read md from base dir
 const OUTPUT_DIR = path.join(BASE_DIR, DOUBAN_USER); // write csv to user subdir
@@ -123,7 +124,18 @@ function main() {
     if (!csvData[mapping.csv]) csvData[mapping.csv] = [];
 
     for (const item of items) {
-      csvData[mapping.csv].push([
+      csvData[mapping.csv].push(item);
+    }
+  }
+
+  // Deduplicate by URL within each file
+  for (const [file, items] of Object.entries(csvData)) {
+    const seen = new Set();
+    const deduped = [];
+    for (const item of items) {
+      if (seen.has(item.url)) continue;
+      seen.add(item.url);
+      deduped.push([
         csvEscape(item.title),
         csvEscape(item.url),
         csvEscape(item.date),
@@ -132,23 +144,11 @@ function main() {
         csvEscape(item.comment),
       ].join(','));
     }
-  }
-
-  // Deduplicate by URL within each file
-  for (const [file, lines] of Object.entries(csvData)) {
-    const seen = new Set();
-    const deduped = [];
-    for (const line of lines) {
-      const url = line.split(',')[1]; // second column is URL
-      if (seen.has(url)) continue;
-      seen.add(url);
-      deduped.push(line);
-    }
 
     fs.mkdirSync(OUTPUT_DIR, { recursive: true });
     const filePath = path.join(OUTPUT_DIR, file);
     fs.writeFileSync(filePath, CSV_HEADER + deduped.join('\n') + '\n', 'utf8');
-    console.log(`Written ${deduped.length} rows to ${filePath} (deduped from ${lines.length})`);
+    console.log(`Written ${deduped.length} rows to ${filePath} (deduped from ${items.length})`);
   }
 
   console.log('\nMigration complete!');

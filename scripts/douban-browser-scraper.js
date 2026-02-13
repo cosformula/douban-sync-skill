@@ -9,6 +9,7 @@ const path = require('path');
 const BROWSER_URL = process.env.BROWSER_URL || 'http://127.0.0.1:18800';
 const USER = process.env.DOUBAN_USER;
 if (!USER) { console.error('Error: DOUBAN_USER env var is required'); process.exit(1); }
+if (!/^[A-Za-z0-9._-]+$/.test(USER)) { console.error('Error: DOUBAN_USER contains invalid characters'); process.exit(1); }
 const BASE_DIR = process.env.OBSIDIAN_DIR || path.join(process.env.HOME, 'obsidian-vault/豆瓣');
 const OUTPUT_DIR = path.join(BASE_DIR, USER);
 
@@ -78,6 +79,9 @@ const categories = [
   { base: 'https://movie.douban.com', path: 'collect', status: '看过', file: '影视.csv', type: 'movie' },
   { base: 'https://movie.douban.com', path: 'do', status: '在看', file: '影视.csv', type: 'movie' },
   { base: 'https://movie.douban.com', path: 'wish', status: '想看', file: '影视.csv', type: 'movie' },
+  { base: 'https://music.douban.com', path: 'collect', status: '听过', file: '音乐.csv', type: 'music' },
+  { base: 'https://music.douban.com', path: 'do', status: '在听', file: '音乐.csv', type: 'music' },
+  { base: 'https://music.douban.com', path: 'wish', status: '想听', file: '音乐.csv', type: 'music' },
   { base: 'https://www.douban.com', path: 'games?action=collect', status: '玩过', file: '游戏.csv', type: 'game' },
   { base: 'https://www.douban.com', path: 'games?action=do', status: '在玩', file: '游戏.csv', type: 'game' },
   { base: 'https://www.douban.com', path: 'games?action=wish', status: '想玩', file: '游戏.csv', type: 'game' },
@@ -107,7 +111,7 @@ async function scrapeCategory(browser, cat) {
       allItems.push(...items);
 
       if (items.length < pageSize) break;
-      start += 30;
+      start += pageSize;
       await sleep(2000);
     }
   } catch (err) {
@@ -136,27 +140,30 @@ async function main() {
   const browser = await puppeteer.connect({ browserURL: BROWSER_URL });
   console.log('Connected!');
 
-  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  try {
+    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
-  const fileData = {};
+    const fileData = {};
 
-  for (const cat of categories) {
-    const items = await scrapeCategory(browser, cat);
-    if (!fileData[cat.file]) fileData[cat.file] = [];
-    for (const item of items) {
-      fileData[cat.file].push(itemToCsvLine(item, cat.status));
+    for (const cat of categories) {
+      const items = await scrapeCategory(browser, cat);
+      if (!fileData[cat.file]) fileData[cat.file] = [];
+      for (const item of items) {
+        fileData[cat.file].push(itemToCsvLine(item, cat.status));
+      }
+      await sleep(3000);
     }
-    await sleep(3000);
-  }
 
-  for (const [file, lines] of Object.entries(fileData)) {
-    const filePath = path.join(OUTPUT_DIR, file);
-    fs.writeFileSync(filePath, CSV_HEADER + lines.join('\n') + '\n', 'utf8');
-    console.log(`Written ${lines.length} rows to ${filePath}`);
-  }
+    for (const [file, lines] of Object.entries(fileData)) {
+      const filePath = path.join(OUTPUT_DIR, file);
+      fs.writeFileSync(filePath, CSV_HEADER + lines.join('\n') + '\n', 'utf8');
+      console.log(`Written ${lines.length} rows to ${filePath}`);
+    }
 
-  console.log('\n✅ All done!');
-  browser.disconnect();
+    console.log('\n✅ All done!');
+  } finally {
+    browser.disconnect();
+  }
 }
 
 main().catch(err => {

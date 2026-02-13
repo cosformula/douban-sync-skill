@@ -5,7 +5,7 @@ description: Export and sync Douban (豆瓣) book/movie/music collections to loc
 
 # Douban Sync
 
-Export Douban collections (books, movies, music) to CSV and keep them in sync via RSS.
+Export Douban collections (books, movies, music, games) to CSV and keep them in sync via RSS.
 
 ## Two Modes
 
@@ -40,15 +40,15 @@ Run `scripts/douban-rss-sync.js` — no login needed.
 node scripts/douban-rss-sync.js
 ```
 
-**Setup:** Set environment variables or edit the script constants:
-- `DOUBAN_USER`: Douban user ID (default: read from script)
-- `OBSIDIAN_DIR`: Output directory for CSV files
+**Setup:** Set environment variables:
+- `DOUBAN_USER` (required): Douban user ID
+- `OBSIDIAN_DIR` (optional): Output root directory, default `~/obsidian-vault/豆瓣`
 
 **Recommended:** Add a daily cron job for automatic sync.
 
 ## Output Format
 
-Three CSV files per user in the output directory:
+Four CSV files per user in the output directory:
 
 ```
 豆瓣/

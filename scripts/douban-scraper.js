@@ -7,9 +7,11 @@ const path = require('path');
 
 const BASE_BOOK = 'https://book.douban.com';
 const BASE_MOVIE = 'https://movie.douban.com';
+const BASE_MUSIC = 'https://music.douban.com';
 const BASE_GAME = 'https://www.douban.com';
 const USER = process.env.DOUBAN_USER;
 if (!USER) { console.error('Error: DOUBAN_USER env var is required'); process.exit(1); }
+if (!/^[A-Za-z0-9._-]+$/.test(USER)) { console.error('Error: DOUBAN_USER contains invalid characters'); process.exit(1); }
 const BASE_DIR = process.env.OBSIDIAN_DIR || path.join(process.env.HOME, 'obsidian-vault/豆瓣');
 const OUTPUT_DIR = path.join(BASE_DIR, USER);
 
@@ -22,9 +24,12 @@ const categories = [
   { base: BASE_MOVIE, type: 'movie', path: 'collect', status: '看过', file: '影视.csv' },
   { base: BASE_MOVIE, type: 'movie', path: 'do', status: '在看', file: '影视.csv' },
   { base: BASE_MOVIE, type: 'movie', path: 'wish', status: '想看', file: '影视.csv' },
-  { base: BASE_GAME, type: 'game', path: 'games?action=collect', status: '玩过', file: '游戏.csv', urlPattern: 'games' },
-  { base: BASE_GAME, type: 'game', path: 'games?action=do', status: '在玩', file: '游戏.csv', urlPattern: 'games' },
-  { base: BASE_GAME, type: 'game', path: 'games?action=wish', status: '想玩', file: '游戏.csv', urlPattern: 'games' },
+  { base: BASE_MUSIC, type: 'music', path: 'collect', status: '听过', file: '音乐.csv' },
+  { base: BASE_MUSIC, type: 'music', path: 'do', status: '在听', file: '音乐.csv' },
+  { base: BASE_MUSIC, type: 'music', path: 'wish', status: '想听', file: '音乐.csv' },
+  { base: BASE_GAME, type: 'game', path: 'games?action=collect', status: '玩过', file: '游戏.csv' },
+  { base: BASE_GAME, type: 'game', path: 'games?action=do', status: '在玩', file: '游戏.csv' },
+  { base: BASE_GAME, type: 'game', path: 'games?action=wish', status: '想玩', file: '游戏.csv' },
 ];
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -50,7 +55,7 @@ function parseListPage(html) {
     const block = itemBlocks[i];
 
     // Title and link
-    const titleMatch = block.match(/<a[^>]*href="(https:\/\/(?:book|movie)\.douban\.com\/subject\/\d+\/)"[^>]*>([\s\S]*?)<\/a>/);
+    const titleMatch = block.match(/<a[^>]*href="(https:\/\/(?:book|movie|music)\.douban\.com\/subject\/\d+\/)"[^>]*>([\s\S]*?)<\/a>/);
     if (!titleMatch) continue;
     const link = titleMatch[1];
     const title = titleMatch[2].replace(/<[^>]+>/g, '').trim();
@@ -119,6 +124,8 @@ async function fetchPage(url) {
 async function fetchAllItems(base, userPath, type) {
   const allItems = [];
   let start = 0;
+  let retries = 0;
+  const MAX_RETRIES = 5;
   const hasQuery = userPath.includes('?');
   const isGame = type === 'game';
   const pageSize = isGame ? 15 : 30;
@@ -135,17 +142,21 @@ async function fetchAllItems(base, userPath, type) {
       if (items.length === 0) { console.log('  No items, stopping.'); break; }
       console.log(`  Found ${items.length} items`);
       allItems.push(...items);
+      retries = 0;
 
       if (items.length < pageSize) { console.log(`  Last page.`); break; }
       start += pageSize;
       await sleep(2000);
     } catch (err) {
       console.error(`  Error: ${err.message}`);
-      if (err.message.includes('403') || err.message.includes('418')) {
-        console.log('  Rate limited, waiting 10s...');
-        await sleep(10000);
+      if ((err.message.includes('403') || err.message.includes('418')) && retries < MAX_RETRIES) {
+        retries++;
+        const delay = 10000 * Math.pow(2, retries - 1);
+        console.log(`  Rate limited, retry ${retries}/${MAX_RETRIES}, waiting ${delay/1000}s...`);
+        await sleep(delay);
         continue;
       }
+      console.error(`  Giving up after ${retries} retries.`);
       break;
     }
   }
