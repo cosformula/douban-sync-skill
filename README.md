@@ -55,6 +55,11 @@ DOUBAN_USER=your_douban_id node scripts/douban-browser-scraper.js
 DOUBAN_USER=your_douban_id node scripts/migrate-md-to-csv.js
 ```
 
+## 安全注意事项
+
+- `douban-browser-scraper.js` 通过 CDP 连接本地浏览器（默认 `http://127.0.0.1:18800`），仅在你自己启动的本地浏览器上使用，不要暴露调试端口到网络
+- 如果只需要增量同步，`douban-rss-sync.js` 不需要登录，风险最低
+
 ## 作为 OpenClaw Skill 使用
 
 将此目录放在 OpenClaw workspace 的 `skills/` 下即可自动识别。
