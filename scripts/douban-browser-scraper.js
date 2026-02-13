@@ -110,7 +110,11 @@ async function scrapeCategory(browser, cat) {
       console.log(`  Got ${items.length} items`);
       allItems.push(...items);
 
-      if (items.length < pageSize) break;
+      const hasNext = await page.evaluate(() => {
+        const next = document.querySelector('.paginator .next a');
+        return !!next;
+      });
+      if (!hasNext) break;
       start += pageSize;
       await sleep(2000);
     }
