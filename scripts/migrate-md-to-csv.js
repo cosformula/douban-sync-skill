@@ -7,7 +7,11 @@
 const fs = require('fs');
 const path = require('path');
 
-const DOUBAN_DIR = process.env.OBSIDIAN_DIR || path.join(process.env.HOME, 'obsidian-vault/豆瓣');
+const DOUBAN_USER = process.env.DOUBAN_USER;
+if (!DOUBAN_USER) { console.error('Error: DOUBAN_USER env var is required'); process.exit(1); }
+const BASE_DIR = process.env.OBSIDIAN_DIR || path.join(process.env.HOME, 'obsidian-vault/豆瓣');
+const DOUBAN_DIR = BASE_DIR; // read md from base dir
+const OUTPUT_DIR = path.join(BASE_DIR, DOUBAN_USER); // write csv to user subdir
 const CSV_HEADER = 'title,url,date,rating,status,comment\n';
 
 const FILE_MAP = [
@@ -141,7 +145,8 @@ function main() {
       deduped.push(line);
     }
 
-    const filePath = path.join(DOUBAN_DIR, file);
+    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+    const filePath = path.join(OUTPUT_DIR, file);
     fs.writeFileSync(filePath, CSV_HEADER + deduped.join('\n') + '\n', 'utf8');
     console.log(`Written ${deduped.length} rows to ${filePath} (deduped from ${lines.length})`);
   }

@@ -47,13 +47,14 @@ node scripts/douban-rss-sync.js
 
 ## Output Format
 
-Three CSV files in the output directory:
+Three CSV files per user in the output directory:
 
 ```
 豆瓣/
-├── 书.csv
-├── 影视.csv
-└── 音乐.csv
+└── {user_id}/
+    ├── 书.csv
+    ├── 影视.csv
+    └── 音乐.csv
 ```
 
 CSV columns:

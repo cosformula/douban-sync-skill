@@ -9,7 +9,8 @@ const path = require('path');
 
 const DOUBAN_USER = process.env.DOUBAN_USER;
 if (!DOUBAN_USER) { console.error('Error: DOUBAN_USER env var is required'); process.exit(1); }
-const OBSIDIAN_DIR = process.env.OBSIDIAN_DIR || path.join(process.env.HOME, 'obsidian-vault/豆瓣');
+const BASE_DIR = process.env.OBSIDIAN_DIR || path.join(process.env.HOME, 'obsidian-vault/豆瓣');
+const OBSIDIAN_DIR = path.join(BASE_DIR, DOUBAN_USER);
 const STATE_FILE = process.env.STATE_FILE || path.join(OBSIDIAN_DIR, '.douban-rss-state.json');
 const RSS_URL = `https://www.douban.com/feed/people/${DOUBAN_USER}/interests`;
 

@@ -9,7 +9,8 @@ const BASE_BOOK = 'https://book.douban.com';
 const BASE_MOVIE = 'https://movie.douban.com';
 const USER = process.env.DOUBAN_USER;
 if (!USER) { console.error('Error: DOUBAN_USER env var is required'); process.exit(1); }
-const OUTPUT_DIR = process.env.OBSIDIAN_DIR || path.join(process.env.HOME, 'obsidian-vault/豆瓣');
+const BASE_DIR = process.env.OBSIDIAN_DIR || path.join(process.env.HOME, 'obsidian-vault/豆瓣');
+const OUTPUT_DIR = path.join(BASE_DIR, USER);
 
 const CSV_HEADER = 'title,url,date,rating,status,comment\n';
 
