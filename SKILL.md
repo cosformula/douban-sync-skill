@@ -21,6 +21,7 @@ Categories and URL paths:
 - Books: `book.douban.com/people/{ID}/collect` (读过), `/do` (在读), `/wish` (想读)
 - Movies: `movie.douban.com/people/{ID}/collect` (看过), `/do` (在看), `/wish` (想看)
 - Music: `music.douban.com/people/{ID}/collect` (听过), `/do` (在听), `/wish` (想听)
+- Games: `www.douban.com/people/{ID}/games?action=collect` (玩过), `=do` (在玩), `=wish` (想玩)
 
 Each page shows 30 items in list mode. Paginate with `?start=0,30,60...` until no items returned.
 
@@ -54,7 +55,8 @@ Three CSV files per user in the output directory:
 └── {user_id}/
     ├── 书.csv
     ├── 影视.csv
-    └── 音乐.csv
+    ├── 音乐.csv
+    └── 游戏.csv
 ```
 
 CSV columns:
@@ -63,7 +65,7 @@ title,url,date,rating,status,comment
 "书名","https://book.douban.com/subject/12345/","2026-01-15","★★★★★","读过","短评内容"
 ```
 
-- `status`: 读过/在读/想读, 看过/在看/想看, 听过/在听/想听
+- `status`: 读过/在读/想读, 看过/在看/想看, 听过/在听/想听, 玩过/在玩/想玩
 
 ## Deduplication
 

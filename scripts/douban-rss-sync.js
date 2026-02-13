@@ -25,6 +25,9 @@ const CATEGORY_MAP = [
   { pattern: /^听过/, file: '音乐.csv', status: '听过', type: 'music' },
   { pattern: /^在听/, file: '音乐.csv', status: '在听', type: 'music' },
   { pattern: /^想听/, file: '音乐.csv', status: '想听', type: 'music' },
+  { pattern: /^玩过/, file: '游戏.csv', status: '玩过', type: 'game' },
+  { pattern: /^在玩/, file: '游戏.csv', status: '在玩', type: 'game' },
+  { pattern: /^想玩/, file: '游戏.csv', status: '想玩', type: 'game' },
 ];
 
 const CSV_HEADER = 'title,url,date,rating,status,comment\n';

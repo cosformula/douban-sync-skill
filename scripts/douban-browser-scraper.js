@@ -59,6 +59,9 @@ const categories = [
   { base: 'https://movie.douban.com', path: 'collect', status: '看过', file: '影视.csv', type: 'movie' },
   { base: 'https://movie.douban.com', path: 'do', status: '在看', file: '影视.csv', type: 'movie' },
   { base: 'https://movie.douban.com', path: 'wish', status: '想看', file: '影视.csv', type: 'movie' },
+  { base: 'https://www.douban.com', path: 'games?action=collect', status: '玩过', file: '游戏.csv', type: 'game' },
+  { base: 'https://www.douban.com', path: 'games?action=do', status: '在玩', file: '游戏.csv', type: 'game' },
+  { base: 'https://www.douban.com', path: 'games?action=wish', status: '想玩', file: '游戏.csv', type: 'game' },
 ];
 
 async function scrapeCategory(browser, cat) {
@@ -69,7 +72,8 @@ async function scrapeCategory(browser, cat) {
   try {
     let start = 0;
     while (true) {
-      const url = `${cat.base}/people/${USER}/${cat.path}?start=${start}&sort=time&rating=all&filter=all&mode=list`;
+      const sep = cat.path.includes('?') ? '&' : '?';
+      const url = `${cat.base}/people/${USER}/${cat.path}${sep}start=${start}&sort=time&rating=all&filter=all&mode=list`;
       console.log(`  Fetching start=${start}...`);
 
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
