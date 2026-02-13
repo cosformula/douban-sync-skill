@@ -74,6 +74,37 @@ function parseListPage(html) {
   return items;
 }
 
+function parseGamePage(html) {
+  const items = [];
+  const itemBlocks = html.split(/<div class="common-item">/);
+
+  for (let i = 1; i < itemBlocks.length; i++) {
+    const block = itemBlocks[i];
+
+    // Title and link
+    const titleMatch = block.match(/<div class="title">\s*<a href="(https:\/\/www\.douban\.com\/game\/\d+\/)">([\s\S]*?)<\/a>/);
+    if (!titleMatch) continue;
+    const link = titleMatch[1];
+    const title = titleMatch[2].replace(/<[^>]+>/g, '').trim();
+
+    // Rating: allstarNN where NN/10 = stars
+    let rating = 0;
+    const ratingMatch = block.match(/allstar(\d+)/);
+    if (ratingMatch) rating = parseInt(ratingMatch[1]) / 10;
+
+    // Date
+    let date = '';
+    const dateMatch = block.match(/<span class="date">([\s\S]*?)<\/span>/);
+    if (dateMatch) {
+      const dm = dateMatch[1].match(/(\d{4}-\d{2}-\d{2})/);
+      if (dm) date = dm[1];
+    }
+
+    items.push({ title, link, date, rating, comment: '' });
+  }
+  return items;
+}
+
 async function fetchPage(url) {
   const resp = await fetch(url, {
     headers: {
@@ -85,10 +116,12 @@ async function fetchPage(url) {
   return await resp.text();
 }
 
-async function fetchAllItems(base, userPath) {
+async function fetchAllItems(base, userPath, type) {
   const allItems = [];
   let start = 0;
   const hasQuery = userPath.includes('?');
+  const isGame = type === 'game';
+  const pageSize = isGame ? 15 : 30;
 
   while (true) {
     const sep = hasQuery ? '&' : '?';
@@ -97,14 +130,14 @@ async function fetchAllItems(base, userPath) {
 
     try {
       const html = await fetchPage(url);
-      const items = parseListPage(html);
+      const items = isGame ? parseGamePage(html) : parseListPage(html);
 
       if (items.length === 0) { console.log('  No items, stopping.'); break; }
       console.log(`  Found ${items.length} items`);
       allItems.push(...items);
 
-      if (items.length < 30) { console.log(`  Last page.`); break; }
-      start += 30;
+      if (items.length < pageSize) { console.log(`  Last page.`); break; }
+      start += pageSize;
       await sleep(2000);
     } catch (err) {
       console.error(`  Error: ${err.message}`);
@@ -138,7 +171,7 @@ async function main() {
 
   for (const cat of categories) {
     console.log(`\n=== ${cat.status} (${cat.type}) ===`);
-    const items = await fetchAllItems(cat.base, cat.path);
+    const items = await fetchAllItems(cat.base, cat.path, cat.type);
     console.log(`Total: ${items.length} items`);
 
     if (!fileData[cat.file]) fileData[cat.file] = [];

@@ -52,6 +52,25 @@ const parseScript = `
 }
 `;
 
+const parseGameScript = `
+() => {
+  const items = document.querySelectorAll('.common-item');
+  const results = [];
+  for (const item of items) {
+    const t = item.querySelector('.title a');
+    const title = t ? t.textContent.trim() : '';
+    const link = t ? t.getAttribute('href') : '';
+    let date = '', rating = 0;
+    const r = item.querySelector('.rating-star');
+    if (r) { const m = r.className.match(/allstar(\\d+)/); if (m) rating = parseInt(m[1]) / 10; }
+    const d = item.querySelector('.date');
+    if (d) { const dm = d.textContent.match(/(\\d{4}-\\d{2}-\\d{2})/); if (dm) date = dm[1]; }
+    results.push({ title, link, date, rating, comment: '' });
+  }
+  return results;
+}
+`;
+
 const categories = [
   { base: 'https://book.douban.com', path: 'collect', status: '读过', file: '书.csv', type: 'book' },
   { base: 'https://book.douban.com', path: 'do', status: '在读', file: '书.csv', type: 'book' },
@@ -79,13 +98,15 @@ async function scrapeCategory(browser, cat) {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
       await sleep(1000);
 
-      const items = await page.evaluate(new Function('return (' + parseScript + ')()'));
+      const script = cat.type === 'game' ? parseGameScript : parseScript;
+      const items = await page.evaluate(new Function('return (' + script + ')()'));
       if (!items || items.length === 0) { console.log('  No items, stopping.'); break; }
 
+      const pageSize = cat.type === 'game' ? 15 : 30;
       console.log(`  Got ${items.length} items`);
       allItems.push(...items);
 
-      if (items.length < 30) break;
+      if (items.length < pageSize) break;
       start += 30;
       await sleep(2000);
     }
