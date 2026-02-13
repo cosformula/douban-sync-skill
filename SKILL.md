@@ -1,6 +1,7 @@
 ---
 name: douban-sync
-description: Export and sync Douban (豆瓣) book/movie/music collections to local CSV files (Obsidian-compatible). Use when the user wants to export their Douban reading/watching/listening history, set up incremental sync via RSS, or manage their Douban data locally.
+description: Export and sync Douban (豆瓣) book/movie/music/game collections to local CSV files (Obsidian-compatible). Use when the user wants to export their Douban reading/watching/listening/gaming history, set up incremental sync via RSS, or manage their Douban data locally.
+metadata: {"openclaw": {"requires": {"env": ["DOUBAN_USER"]}, "primaryEnv": "DOUBAN_USER"}}
 ---
 
 # Douban Sync
