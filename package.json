@@ -1,0 +1,7 @@
+{
+  "name": "douban-sync-skill",
+  "version": "0.1.0",
+  "description": "Douban (豆瓣) collection sync to CSV — books, movies, music, games",
+  "license": "MIT",
+  "repository": "cosformula/douban-sync-skill"
+}
