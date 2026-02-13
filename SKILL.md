@@ -24,7 +24,7 @@ Categories and URL paths:
 - Music: `music.douban.com/people/{ID}/collect` (听过), `/do` (在听), `/wish` (想听)
 - Games: `www.douban.com/people/{ID}/games?action=collect` (玩过), `=do` (在玩), `=wish` (想玩)
 
-Each page shows 30 items in list mode. Paginate with `?start=0,30,60...` until no items returned.
+Each page shows up to 30 items in list mode (some pages may have fewer due to delisted entries). Paginate with `?start=0,30,60...` — the script uses the paginator's "next" button to determine whether to continue.
 
 **Rate limiting:** Wait 2-3 seconds between pages. If blocked, wait 30 seconds and retry.
 
@@ -52,7 +52,7 @@ node scripts/douban-rss-sync.js
 Four CSV files per user in the output directory:
 
 ```
-豆瓣/
+douban-sync/
 └── {user_id}/
     ├── 书.csv
     ├── 影视.csv
