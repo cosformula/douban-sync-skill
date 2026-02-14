@@ -21,8 +21,14 @@ jobs:
             node --check "$f"
           done
 
-      - name: Run tests
-        run: node --test tests/*.test.mjs
+      - name: Run unit + fixture tests
+        run: node --test tests/*.test.mjs tests/e2e.test.mjs
+
+      - name: Run live E2E tests
+        if: env.DOUBAN_USER != ''
+        env:
+          DOUBAN_USER: ${{ secrets.DOUBAN_USER }}
+        run: node --test tests/e2e-live.test.mjs
 
   package-check:
     runs-on: ubuntu-latest
