@@ -1,5 +1,8 @@
 # douban-sync-skill
 
+[![ClawHub](https://img.shields.io/badge/ClawHub-douban--sync--skill-blue?logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K)](https://clawhub.ai/skills/douban-sync-skill)
+[![GitHub stars](https://img.shields.io/github/stars/cosformula/douban-sync-skill?style=flat&logo=github)](https://github.com/cosformula/douban-sync-skill)
+
 豆瓣书影音游戏标记数据导出与增量同步工具。支持全量导出和 RSS 增量同步，输出 CSV 格式。
 
 可作为 [OpenClaw](https://github.com/openclaw/openclaw) / [AgentSkills](https://agentskills.io) 的 skill 使用，也可独立运行。
