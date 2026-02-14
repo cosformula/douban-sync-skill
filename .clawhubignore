@@ -20,5 +20,8 @@ tmp/
 Thumbs.db
 *.log
 
+# Tests
+tests/
+
 # GitHub-only docs
 README.md
