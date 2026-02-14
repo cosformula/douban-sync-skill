@@ -80,6 +80,7 @@ jobs:
 
           clawhub publish /tmp/skill \
             --slug douban-sync-skill \
+            --name "Douban Sync" \
             --version "$VERSION" \
             --changelog "$CHANGELOG" \
             --tags "$TAGS"
