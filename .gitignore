@@ -1,3 +1,5 @@
-
-# Tests (local only)
-tests/
+node_modules/
+data/
+tmp/
+*.log
+.DS_Store

@@ -21,6 +21,9 @@ jobs:
             node --check "$f"
           done
 
+      - name: Run tests
+        run: node --test tests/*.test.mjs
+
   package-check:
     runs-on: ubuntu-latest
     steps:
