@@ -1,0 +1,69 @@
+name: Publish to ClawHub
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Semver version to publish (e.g. 0.1.5)"
+        required: true
+      changelog:
+        description: "Changelog text (shown on ClawHub)"
+        required: true
+        default: "Update"
+      tags:
+        description: "Comma-separated tags (default: latest)"
+        required: false
+        default: "latest"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build clean publish dir (allowlist)
+        run: |
+          set -euo pipefail
+          OUT=/tmp/skill
+          rm -rf "$OUT"
+          mkdir -p "$OUT"
+          rsync -a --delete \
+            --include='SKILL.md' \
+            --include='README.md' \
+            --include='LICENSE' \
+            --include='LICENSE.md' \
+            --include='CHANGELOG.md' \
+            --include='scripts/***' \
+            --include='assets/***' \
+            --include='templates/***' \
+            --include='prompts/***' \
+            --include='config/***' \
+            --include='examples/***' \
+            --include='**/*.md' \
+            --exclude='*' \
+            ./ "$OUT/"
+          echo "Publish dir contents:"
+          find "$OUT" -maxdepth 3 -type f -print
+
+      - name: Install ClawHub CLI
+        run: |
+          npm i -g clawhub@latest
+          clawhub --help >/dev/null
+
+      - name: Login to ClawHub
+        env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          clawhub login --token "$CLAWHUB_TOKEN" --no-browser
+          clawhub whoami
+
+      - name: Publish
+        run: |
+          set -euo pipefail
+          clawhub publish /tmp/skill \
+            --slug douban-sync-skill \
+            --version "${{ inputs.version }}" \
+            --changelog "${{ inputs.changelog }}" \
+            --tags "${{ inputs.tags }}"
