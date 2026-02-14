@@ -1,0 +1,21 @@
+.git/
+.github/
+
+# Runtime / deps
+node_modules/
+.venv/
+__pycache__/
+
+# Build artifacts
+build/
+dist/
+
+# Data / temp
+data/
+tmp/
+.cache/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+*.log

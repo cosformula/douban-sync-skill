@@ -22,27 +22,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build clean publish dir (allowlist)
+      - name: Build clean publish dir (rsync + .clawhubignore)
         run: |
           set -euo pipefail
           OUT=/tmp/skill
           rm -rf "$OUT"
           mkdir -p "$OUT"
-          rsync -a --delete \
-            --include='SKILL.md' \
-            --include='README.md' \
-            --include='LICENSE' \
-            --include='LICENSE.md' \
-            --include='CHANGELOG.md' \
-            --include='scripts/***' \
-            --include='assets/***' \
-            --include='templates/***' \
-            --include='prompts/***' \
-            --include='config/***' \
-            --include='examples/***' \
-            --include='**/*.md' \
-            --exclude='*' \
-            ./ "$OUT/"
+
+          # Copy everything except ignored paths.
+          rsync -a --delete --exclude-from=.clawhubignore ./ "$OUT/"
+
+          # Ensure required docs exist.
+          test -f "$OUT/SKILL.md"
+
           echo "Publish dir contents:"
           find "$OUT" -maxdepth 3 -type f -print
 
