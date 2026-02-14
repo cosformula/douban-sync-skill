@@ -19,3 +19,6 @@ tmp/
 .DS_Store
 Thumbs.db
 *.log
+
+# GitHub-only docs
+README.md
