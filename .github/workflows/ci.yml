@@ -16,7 +16,10 @@ jobs:
 
       - name: Node syntax checks
         run: |
-          bash tests/syntax.test.sh
+          for f in scripts/*.js; do
+            echo "[syntax] $f"
+            node --check "$f"
+          done
 
   package-check:
     runs-on: ubuntu-latest
