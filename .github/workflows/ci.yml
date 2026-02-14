@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Node syntax checks
+        run: |
+          bash tests/syntax.test.sh
+
+  package-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build publish dir via .clawhubignore
+        run: |
+          set -euo pipefail
+          OUT=/tmp/skill
+          rm -rf "$OUT"
+          mkdir -p "$OUT"
+          rsync -a --delete --exclude-from=.clawhubignore ./ "$OUT/"
+
+          echo "Publish files:"; find "$OUT" -type f -maxdepth 3 -print
+
+          # Ensure ignored files are excluded
+          test ! -f "$OUT/README.md"
+          test ! -d "$OUT/tests"
+          test ! -d "$OUT/.github"
+
+          # Ensure required files exist
+          test -f "$OUT/SKILL.md"
+          test -d "$OUT/scripts"
