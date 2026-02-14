@@ -15,6 +15,10 @@ on:
         required: false
         default: "latest"
 
+  push:
+    tags:
+      - "v*"
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -52,10 +56,30 @@ jobs:
           clawhub whoami
 
       - name: Publish
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_CHANGELOG: ${{ inputs.changelog }}
+          INPUT_TAGS: ${{ inputs.tags }}
         run: |
           set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            VERSION="$INPUT_VERSION"
+            CHANGELOG="$INPUT_CHANGELOG"
+            TAGS="$INPUT_TAGS"
+          else
+            # Tag push: version comes from tag name like v0.1.5
+            VERSION="${REF_NAME#v}"
+            CHANGELOG="Release ${REF_NAME}"
+            TAGS="latest"
+          fi
+
+          echo "Publishing version=$VERSION tags=$TAGS" >&2
+
           clawhub publish /tmp/skill \
             --slug douban-sync-skill \
-            --version "${{ inputs.version }}" \
-            --changelog "${{ inputs.changelog }}" \
-            --tags "${{ inputs.tags }}"
+            --version "$VERSION" \
+            --changelog "$CHANGELOG" \
+            --tags "$TAGS"
