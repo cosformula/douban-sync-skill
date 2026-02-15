@@ -6,11 +6,12 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 
 const DOUBAN_USER = process.env.DOUBAN_USER;
 if (!DOUBAN_USER) { console.error('Error: DOUBAN_USER env var is required'); process.exit(1); }
 if (!/^[A-Za-z0-9._-]+$/.test(DOUBAN_USER)) { console.error('Error: DOUBAN_USER contains invalid characters'); process.exit(1); }
-const BASE_DIR = process.env.DOUBAN_OUTPUT_DIR || path.join(process.env.HOME, 'douban-sync');
+const BASE_DIR = process.env.DOUBAN_OUTPUT_DIR || path.join(os.homedir(), 'douban-sync');
 const DOUBAN_DIR = BASE_DIR; // read md from base dir
 const OUTPUT_DIR = path.join(BASE_DIR, DOUBAN_USER); // write csv to user subdir
 const CSV_HEADER = 'title,url,date,rating,status,comment\n';
