@@ -2,9 +2,9 @@
 // Douban full export via CDP browser — outputs CSV
 // Connects to an existing browser session (e.g. opened with --remote-debugging-port)
 
-const puppeteer = require('puppeteer-core');
-const fs = require('fs');
-const path = require('path');
+import puppeteer from 'puppeteer-core';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const BROWSER_URL = process.env.BROWSER_URL || 'http://127.0.0.1:18800';
 const USER = process.env.DOUBAN_USER;

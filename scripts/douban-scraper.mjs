@@ -2,8 +2,8 @@
 // Douban full export scraper — outputs CSV
 // Fetches all collection pages via HTTP (no browser needed, but may get rate-limited)
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
 
 const BASE_BOOK = 'https://book.douban.com';
 const BASE_MOVIE = 'https://movie.douban.com';

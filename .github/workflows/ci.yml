@@ -17,9 +17,8 @@ jobs:
 
       - name: Node syntax checks
         run: |
-          for f in scripts/*.js; do
-            echo "[syntax] $f"
-            node --check "$f"
+          for f in scripts/*.mjs scripts/*.js; do
+            [ -f "$f" ] && echo "[syntax] $f" && node --check "$f"
           done
 
       - name: Run unit + fixture tests

@@ -5,6 +5,7 @@
 [![ClawHub downloads](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fclawhub.ai%2Fapi%2Fv1%2Fskills%2Fdouban-sync-skill&query=%24.skill.stats.downloads&label=clawhub%20downloads&color=blue)](https://clawhub.ai/skills/douban-sync-skill)
 [![GitHub stars](https://img.shields.io/github/stars/cosformula/douban-sync-skill?style=flat&logo=github)](https://github.com/cosformula/douban-sync-skill)
 [![License](https://img.shields.io/github/license/cosformula/douban-sync-skill)](./LICENSE)
+[![CI](https://github.com/cosformula/douban-sync-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/cosformula/douban-sync-skill/actions/workflows/ci.yml)
 [![Publish to ClawHub](https://github.com/cosformula/douban-sync-skill/actions/workflows/clawhub-publish.yml/badge.svg)](https://github.com/cosformula/douban-sync-skill/actions/workflows/clawhub-publish.yml)
 
 豆瓣书影音游戏标记数据导出与增量同步工具。支持全量导出和 RSS 增量同步，输出 CSV 格式。
@@ -34,17 +35,22 @@ CSV 列：`title,url,date,rating,status,comment`
 
 ## 安装
 
-### 通过 ClawHub（推荐）
+### Via npx skills (any agent)
 
 ```bash
-npm i -g clawhub
+npx skills add cosformula/douban-sync-skill
+```
+
+### Via ClawHub (OpenClaw)
+
+```bash
 clawhub install douban-sync-skill
 ```
 
-### 手动安装
+### Manual
 
 ```bash
-git clone https://github.com/cosformula/douban-sync-skill.git skills/douban-sync
+git clone https://github.com/cosformula/douban-sync-skill.git
 ```
 
 ## 使用
@@ -52,7 +58,7 @@ git clone https://github.com/cosformula/douban-sync-skill.git skills/douban-sync
 ### 增量同步（推荐日常使用）
 
 ```bash
-DOUBAN_USER=your_douban_id node scripts/douban-rss-sync.js
+DOUBAN_USER=your_douban_id node scripts/douban-rss-sync.mjs
 ```
 
 环境变量：
@@ -63,10 +69,10 @@ DOUBAN_USER=your_douban_id node scripts/douban-rss-sync.js
 
 ```bash
 # HTTP 直接抓取（可能被限速）
-DOUBAN_USER=your_douban_id node scripts/douban-scraper.js
+DOUBAN_USER=your_douban_id node scripts/douban-scraper.mjs
 
 # 通过浏览器 CDP 抓取（需要 puppeteer-core + 已登录的浏览器）
-DOUBAN_USER=your_douban_id node scripts/douban-browser-scraper.js
+DOUBAN_USER=your_douban_id node scripts/douban-browser-scraper.mjs
 ```
 
 ### 从 Markdown 迁移到 CSV
@@ -74,13 +80,13 @@ DOUBAN_USER=your_douban_id node scripts/douban-browser-scraper.js
 如果之前用的是 Markdown 格式的导出数据：
 
 ```bash
-DOUBAN_USER=your_douban_id node scripts/migrate-md-to-csv.js
+DOUBAN_USER=your_douban_id node scripts/migrate-md-to-csv.mjs
 ```
 
 ## 安全注意事项
 
-- `douban-browser-scraper.js` 通过 CDP 连接本地浏览器（默认 `http://127.0.0.1:18800`），仅在你自己启动的本地浏览器上使用，不要暴露调试端口到网络
-- 如果只需要增量同步，`douban-rss-sync.js` 不需要登录，风险最低
+- `douban-browser-scraper.mjs` 通过 CDP 连接本地浏览器（默认 `http://127.0.0.1:18800`），仅在你自己启动的本地浏览器上使用，不要暴露调试端口到网络
+- 如果只需要增量同步，`douban-rss-sync.mjs` 不需要登录，风险最低
 
 ## 作为 OpenClaw Skill 使用
 

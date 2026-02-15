@@ -20,7 +20,7 @@ describe('E2E Live: douban-rss-sync against real RSS feed', { skip }, () => {
   });
 
   it('should run douban-rss-sync and produce CSV files', () => {
-    const scriptPath = path.resolve(import.meta.dirname, '..', 'scripts', 'douban-rss-sync.js');
+    const scriptPath = path.resolve(import.meta.dirname, '..', 'scripts', 'douban-rss-sync.mjs');
 
     execFileSync('node', [scriptPath], {
       env: {
@@ -90,7 +90,7 @@ describe('E2E Live: douban-rss-sync against real RSS feed', { skip }, () => {
   });
 
   it('should be idempotent (running twice does not duplicate entries)', async () => {
-    const scriptPath = path.resolve(import.meta.dirname, '..', 'scripts', 'douban-rss-sync.js');
+    const scriptPath = path.resolve(import.meta.dirname, '..', 'scripts', 'douban-rss-sync.mjs');
 
     // Run a second time
     execFileSync('node', [scriptPath], {

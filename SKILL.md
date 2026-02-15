@@ -29,16 +29,16 @@ Each page shows up to 30 items in list mode (some pages may have fewer due to de
 **Rate limiting:** Wait 2-3 seconds between pages. If blocked, wait 30 seconds and retry.
 
 **Scripts:**
-- `scripts/douban-scraper.js` — HTTP-only, no browser needed (may get rate-limited)
-- `scripts/douban-browser-scraper.js` — via Puppeteer CDP, needs a running browser
-- `scripts/douban-extract.js` — generates a browser console script for manual extraction
+- `scripts/douban-scraper.mjs` — HTTP-only, no browser needed (may get rate-limited)
+- `scripts/douban-browser-scraper.mjs` — via Puppeteer CDP, needs a running browser
+- `scripts/douban-extract.mjs` — generates a browser console script for manual extraction
 
 ### 2. Incremental Sync (daily, via RSS)
 
-Run `scripts/douban-rss-sync.js` — no login needed.
+Run `scripts/douban-rss-sync.mjs` — no login needed.
 
 ```bash
-node scripts/douban-rss-sync.js
+node scripts/douban-rss-sync.mjs
 ```
 
 **Setup:** Set environment variables:

@@ -1,6 +1,6 @@
 // Shared utility functions extracted for testing.
 
-const RATING_MAP = {
+export const RATING_MAP = {
   '力荐': '★★★★★',
   '推荐': '★★★★',
   '还行': '★★★',
@@ -8,7 +8,7 @@ const RATING_MAP = {
   '很差': '★',
 };
 
-const CATEGORY_MAP = [
+export const CATEGORY_MAP = [
   { pattern: /^读过/, file: '书.csv', status: '读过', type: 'book' },
   { pattern: /^(?:在读|最近在读)/, file: '书.csv', status: '在读', type: 'book' },
   { pattern: /^想读/, file: '书.csv', status: '想读', type: 'book' },
@@ -23,7 +23,7 @@ const CATEGORY_MAP = [
   { pattern: /^想玩/, file: '游戏.csv', status: '想玩', type: 'game' },
 ];
 
-function csvEscape(str) {
+export function csvEscape(str) {
   if (!str) return '';
   if (str.includes(',') || str.includes('"') || str.includes('\n')) {
     return '"' + str.replace(/"/g, '""') + '"';
@@ -31,7 +31,7 @@ function csvEscape(str) {
   return str;
 }
 
-function parseItems(xml) {
+export function parseItems(xml) {
   const items = [];
   const itemRegex = /<item>([\s\S]*?)<\/item>/g;
   let match;
@@ -58,17 +58,9 @@ function parseItems(xml) {
   return items;
 }
 
-function matchCategory(title) {
+export function matchCategory(title) {
   for (const cat of CATEGORY_MAP) {
     if (cat.pattern.test(title)) return cat;
   }
   return null;
 }
-
-module.exports = {
-  csvEscape,
-  parseItems,
-  matchCategory,
-  RATING_MAP,
-  CATEGORY_MAP,
-};

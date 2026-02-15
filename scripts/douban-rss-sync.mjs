@@ -2,10 +2,10 @@
 // Douban RSS → CSV incremental sync
 // Pulls RSS feed, parses new entries, appends to corresponding CSV files
 
-const https = require('https');
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+import https from 'node:https';
+import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const DOUBAN_USER = process.env.DOUBAN_USER;
 if (!DOUBAN_USER) { console.error('Error: DOUBAN_USER env var is required'); process.exit(1); }

@@ -4,8 +4,8 @@
 //   1. Full export: ### Title\n- 作者：...\n- 我的评分：...\n- 标记日期：...\n- 短评：...\n- 链接：...
 //   2. RSS incremental: - [Title](url) | date | rating | "comment"
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
 
 const DOUBAN_USER = process.env.DOUBAN_USER;
 if (!DOUBAN_USER) { console.error('Error: DOUBAN_USER env var is required'); process.exit(1); }

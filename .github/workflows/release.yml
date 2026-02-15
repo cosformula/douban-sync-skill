@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build skill package
+        run: |
+          set -euo pipefail
+          OUT=/tmp/skill-pkg
+          rm -rf "$OUT" && mkdir -p "$OUT"
+          rsync -a --delete --exclude-from=.clawhubignore ./ "$OUT/"
+          test -f "$OUT/SKILL.md"
+
+          SKILL_NAME=$(basename "$GITHUB_REPOSITORY" | sed 's/-skill$//')
+          VERSION="${GITHUB_REF_NAME#v}"
+          ARCHIVE="${SKILL_NAME}-${VERSION}.tar.gz"
+          tar -czf "/tmp/${ARCHIVE}" -C "$OUT" .
+          echo "ARCHIVE=/tmp/${ARCHIVE}" >> "$GITHUB_ENV"
+          echo "SKILL_NAME=${SKILL_NAME}" >> "$GITHUB_ENV"
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "${{ env.SKILL_NAME }} v${{ env.VERSION }}"
+          generate_release_notes: true
+          files: ${{ env.ARCHIVE }}
